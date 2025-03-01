@@ -1,1 +1,1 @@
-pub mod node_edge;
+pub mod graph;
