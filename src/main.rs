@@ -11,32 +11,28 @@ fn setup() -> Graph {
 
     head.add_edge(&node2, 5);
     head.add_edge(&node1, 10);
-    node2.add_edge(&node1, 3);
-    node1.add_edge(&end, 5);
-    node2.add_edge(&end, 5);
+    node2.add_edge(&node1, 7);
+    node1.add_edge(&end, 1);
+    node2.add_edge(&end, 10);
     
     Graph::new(&vec![head, node1, node2, end])
 }
 
 fn main() {
     let mut graph = setup();
-    let mut processed : HashSet<String> = HashSet::new();
+    let mut _processed : HashSet<String> = HashSet::new();
 
     let start = graph.head.clone().unwrap();
     let mut queue: VecDeque<Edge> = VecDeque::from(*start.get_edges_orderby_cost());
 
     while !queue.is_empty() {
-    
         if let Some(edge) = queue.pop_front() {
             let vertex_from = &edge.from.clone();
             let vertex_to = &edge.to.clone();
 
-            if processed.get(vertex_from).is_some() { continue; }
-            processed.insert(vertex_from.clone());
-    
-            if let Some(cost_record) = &graph.get_cost(vertex_from.clone()) {
+            if let Some(cost_record) = &graph.get_cost(vertex_to.clone()) {
                 if &edge.weight < &cost_record.total {
-                    graph.update_cost(vertex_from.clone(), vertex_to.clone(), &edge.weight);
+                    graph.update_cost(vertex_to.clone(), vertex_from.clone(), &edge.weight);
                 }
             }
 
@@ -49,17 +45,14 @@ fn main() {
             }
         }
     }
-    
 
-    if let Some(mut from) = graph.get_cost(start.name.clone()) {
-        println!("[FROM]: {}\n[TO]: {}\n", start.name, &from.next);
-        let mut total = 0;
-        while let Some(to) = graph.get_cost(from.next.clone()) {
-            if to.next.is_empty() { break; }
-            println!("[FROM]: {}\n[TO]: {}\n", from.next, &to.next);
+    if let Some(mut from) = graph.get_cost("End".to_string()) {
+        println!("[FROM]: {}\n[TO]: {}\n", "End".to_string(), &from.previous);
+        while let Some(to) = graph.get_cost(from.previous.clone()) {
+            if to.previous.is_empty() { break; }
+            println!("[FROM]: {}\n[TO]: {}\n", from.previous, &to.previous);
             from = to.clone();
-            total = to.total as i32;
         }
-        println!("Total: {}", total);
+        println!("Total: {}", graph.get_cost("End".to_string()).unwrap().total);
     }
 }
